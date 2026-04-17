@@ -4,7 +4,7 @@ from flask_socketio import SocketIO, emit, join_room
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'adhya_pratham_private_key'
 # SocketIO setup with CORS for local testing
-socketio = SocketIO(app, cors_allowed_origins="*")
+socketio = SocketIO(app, cors_allowed_origins="*") # CORS allow karna zaroori hai
 
 # Fixed Credentials as per your request
 USERS = {
@@ -67,5 +67,6 @@ def handle_disconnect():
             break
 
 if __name__ == '__main__':
-    # Debug mode on rakha hai taaki changes turant dikhein
-    socketio.run(app, host='0.0.0.0', port=5000, debug=True)
+    # Render PORT variable provide karta hai, use pick karna zaroori hai
+    port = int(os.environ.get("PORT", 5000))
+    socketio.run(app, host='0.0.0.0', port=port)

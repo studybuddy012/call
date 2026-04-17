@@ -3,112 +3,111 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Private Connect</title>
+    <title>Connect | Private</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
     
     <style>
+        * { -webkit-tap-highlight-color: transparent; }
         body { 
             font-family: 'Quicksand', sans-serif; 
             background: #f8fafc;
-            height: 100dvh;
+            height: 100vh;
             overflow: hidden;
-            width: 100%;
-            position: fixed;
+            color: #1e293b;
+            touch-action: manipulation;
         }
 
-        /* Optimized Background for Mobile Performance */
-        .bg-gradient {
+        /* Optimized Background */
+        .bg-glow {
             position: fixed;
-            inset: 0;
-            background: linear-gradient(135deg, #fce7f3 0%, #e0e7ff 100%);
-            z-index: -2;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(circle at 10% 20%, rgba(219, 234, 254, 0.8) 0%, transparent 50%),
+                        radial-gradient(circle at 90% 80%, rgba(251, 207, 232, 0.8) 0%, transparent 50%);
+            z-index: -1;
         }
 
+        /* High Performance Glass */
         .glass { 
             background: rgba(255, 255, 255, 0.8); 
-            backdrop-filter: blur(12px); 
-            -webkit-backdrop-filter: blur(12px);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.5);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            transform: translateZ(0); /* Forces GPU usage for smoothness */
         }
 
-        /* Faster, smoother animations */
-        .slide-up {
-            animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        /* Pulse for Ringing */
+        .ring-pulse {
+            animation: pulse-ring 1.8s infinite;
         }
-
-        @keyframes slideUp {
-            from { transform: translateY(20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
-        .pulse-ring {
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
+        @keyframes pulse-ring {
             0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
             70% { box-shadow: 0 0 0 20px rgba(59, 130, 246, 0); }
             100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
         }
+
+        .hold-active {
+            background: #fff7ed !important;
+            border-color: #fb923c !important;
+            color: #ea580c !important;
+        }
+
+        input:focus { transform: translateY(-2px); }
+        button:active { transform: scale(0.96); }
+        .transition-smooth { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
     </style>
 </head>
-<body class="flex items-center justify-center p-6">
-    <div class="bg-gradient"></div>
+<body class="flex items-center justify-center p-4">
 
-    <div id="login-section" class="glass slide-up p-8 rounded-[2rem] w-full max-w-[350px] text-center z-10">
-        <h1 class="text-2xl font-bold text-slate-800 mb-1">Private Connect</h1>
-        <p class="text-slate-500 text-xs font-semibold uppercase tracking-widest mb-8">Secure Login</p>
+    <div class="bg-glow"></div>
+
+    <div id="login-section" class="glass p-8 rounded-[2rem] w-full max-w-sm text-center transition-smooth">
+        <h1 class="text-2xl font-bold mb-6 tracking-tight">Private Connect</h1>
         <div class="space-y-4">
-            <input id="username" type="text" placeholder="Username" class="w-full p-4 rounded-xl bg-white/50 border-none outline-none focus:ring-2 ring-blue-400 transition-all">
-            <input id="password" type="password" placeholder="Password" class="w-full p-4 rounded-xl bg-white/50 border-none outline-none focus:ring-2 ring-blue-400 transition-all">
-            <button onclick="login()" class="bg-blue-600 text-white w-full py-4 rounded-xl font-bold shadow-lg active:scale-95 transition-transform">Enter</button>
+            <input id="username" type="text" placeholder="User" class="w-full p-4 rounded-xl bg-white/50 outline-none border border-transparent focus:border-blue-300 transition-smooth">
+            <input id="password" type="password" placeholder="Key" class="w-full p-4 rounded-xl bg-white/50 outline-none border border-transparent focus:border-blue-300 transition-smooth">
+            <button onclick="login()" class="bg-blue-600 text-white w-full py-4 rounded-xl font-bold shadow-lg shadow-blue-100 transition-smooth">Join</button>
         </div>
     </div>
 
-    <div id="main-section" class="hidden glass slide-up p-10 rounded-[2.5rem] w-full max-w-[350px] text-center z-10">
-        <h2 id="welcome-msg" class="text-2xl font-bold text-slate-800 mb-2"></h2>
-        <p class="text-slate-500 text-sm mb-10" id="status-display">Connection Secure</p>
-        <button onclick="initiateCall()" class="bg-emerald-500 p-8 rounded-full shadow-2xl active:scale-90 transition-transform inline-flex items-center justify-center">
+    <div id="main-section" class="hidden glass p-10 rounded-[2.5rem] w-full max-w-xs text-center transition-smooth">
+        <h2 id="welcome-msg" class="text-2xl font-bold mb-2"></h2>
+        <p class="text-slate-400 text-sm mb-10">Status: Secure</p>
+        <button onclick="initiateCall()" class="bg-green-500 p-7 rounded-full shadow-xl shadow-green-100 animate-bounce">
             <svg class="w-10 h-10 fill-white" viewBox="0 0 24 24"><path d="M20 15.5c-1.2 0-2.4-.2-3.6-.6-.3-.1-.7 0-1 .2l-2.2 2.2c-2.8-1.4-5.1-3.8-6.6-6.6l2.2-2.2c.3-.3.4-.7.2-1-.3-1.1-.5-2.3-.5-3.5 0-.6-.4-1-1-1H4c-.6 0-1 .4-1 1 0 9.4 7.6 17 17 17 .6 0 1-.4 1-1v-3.5c0-.6-.4-1-1-1z"/></svg>
         </button>
     </div>
 
-    <div id="call-overlay" class="hidden fixed inset-0 bg-slate-50/90 backdrop-blur-xl flex flex-col items-center justify-around py-16 px-6 z-50">
-        <div class="text-center">
-            <div id="ring-glow" class="w-32 h-32 rounded-full bg-white flex items-center justify-center shadow-xl mb-6 mx-auto border-4 border-white overflow-hidden">
+    <div id="call-overlay" class="hidden fixed inset-0 bg-white/90 backdrop-blur-lg flex flex-col items-center justify-center z-50">
+        <div class="relative mb-8">
+            <div id="ring-glow" class="w-32 h-32 rounded-full bg-blue-50 flex items-center justify-center ring-pulse transition-smooth">
                 <span id="remote-initial" class="text-5xl font-bold text-blue-600">?</span>
             </div>
-            <h3 id="remote-user-name" class="text-3xl font-bold text-slate-800 uppercase tracking-tighter">User</h3>
-            <p id="call-timer" class="text-blue-500 font-bold text-sm tracking-widest mt-2">CALLING...</p>
         </div>
+        <h3 id="remote-user-name" class="text-2xl font-bold text-slate-800 uppercase tracking-widest">User</h3>
+        <p id="call-timer" class="text-blue-500 font-bold mt-2">Calling...</p>
         
-        <div class="flex gap-6">
-            <button id="hold-btn" onclick="toggleHold()" class="w-16 h-16 rounded-full glass flex items-center justify-center active:bg-white shadow-md">
-                <svg class="w-6 h-6 fill-slate-500" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+        <div class="flex gap-8 mt-16">
+            <button id="hold-btn" onclick="toggleHold()" class="w-16 h-16 rounded-full glass flex items-center justify-center transition-smooth">
+                <svg class="w-6 h-6 fill-slate-600" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
             </button>
-            <button onclick="endCall()" class="w-16 h-16 rounded-full bg-red-500 flex items-center justify-center shadow-xl active:scale-90 transition-transform">
+            <button onclick="endCall()" class="w-16 h-16 rounded-full bg-red-500 flex items-center justify-center shadow-lg shadow-red-200">
                 <svg class="w-8 h-8 fill-white" viewBox="0 0 24 24"><path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08a.984.984 0 0 1-.29-.7c0-.28.11-.53.29-.71C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 4.67c.18.18.29.43.29.71 0 .28-.11.53-.29.71l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.11-.7-.28-.79-.74-1.69-1.36-2.67-1.85-.33-.16-.56-.5-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z"/></svg>
             </button>
         </div>
-        <audio id="remoteAudio" autoplay playsinline></audio>
+        <audio id="remoteAudio" autoplay></audio>
     </div>
 
-    <div id="incoming-popup" class="hidden fixed top-6 inset-x-6 glass p-6 rounded-[1.5rem] shadow-2xl border-l-4 border-emerald-500 z-[60] slide-up">
-        <div class="flex items-center gap-4 mb-4">
-            <div class="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
-                <svg class="w-6 h-6 fill-emerald-600" viewBox="0 0 24 24"><path d="M20 15.5c-1.2 0-2.4-.2-3.6-.6-.3-.1-.7 0-1 .2l-2.2 2.2c-2.8-1.4-5.1-3.8-6.6-6.6l2.2-2.2c.3-.3.4-.7.2-1-.3-1.1-.5-2.3-.5-3.5 0-.6-.4-1-1-1H4c-.6 0-1 .4-1 1 0 9.4 7.6 17 17 17 .6 0 1-.4 1-1v-3.5c0-.6-.4-1-1-1z"/></svg>
-            </div>
-            <div>
-                <p id="incoming-text" class="font-bold text-slate-800"></p>
-                <p class="text-[10px] text-slate-400 uppercase font-bold">Incoming Call</p>
-            </div>
+    <div id="incoming-popup" class="hidden fixed top-4 inset-x-4 glass p-6 rounded-2xl shadow-xl z-[60] border-t-4 border-green-500 transition-smooth">
+        <div class="flex items-center justify-between mb-4">
+            <span id="incoming-text" class="font-bold text-lg"></span>
+            <span class="text-xs font-bold text-green-500 animate-pulse">INCOMING CALL</span>
         </div>
         <div class="flex gap-3">
-            <button onclick="acceptCall()" class="flex-1 bg-emerald-500 py-3 rounded-xl text-white font-bold active:scale-95 transition-transform">Accept</button>
-            <button onclick="rejectCall()" class="flex-1 bg-slate-100 py-3 rounded-xl text-slate-600 font-bold active:scale-95">Decline</button>
+            <button onclick="acceptCall()" class="flex-1 bg-green-500 py-3 rounded-xl text-white font-bold">Accept</button>
+            <button onclick="rejectCall()" class="flex-1 bg-slate-100 py-3 rounded-xl text-slate-500 font-bold">Ignore</button>
         </div>
     </div>
 
@@ -117,41 +116,28 @@
         let myUser = "", targetUser = "", pc = null, localStream = null, isHold = false;
         const config = { iceServers: [{ urls: "stun:stun.l.google.com:19302" }] };
 
-        // --- Fixing Mobile Interaction ---
         function login() {
             const user = document.getElementById('username').value.trim().toLowerCase();
             const pass = document.getElementById('password').value;
             if(user && pass) {
-                // Visual feedback
-                document.getElementById('login-section').style.opacity = "0.5";
-                socket.emit('login', { username: user, password: pass });
+                document.getElementById('login-section').style.opacity = "0";
+                setTimeout(() => socket.emit('login', { username: user, password: pass }), 300);
             }
         }
 
         socket.on('login_success', (data) => {
             myUser = data.username;
             targetUser = (myUser === "pratham") ? "adhya" : "pratham";
-            
             document.getElementById('login-section').classList.add('hidden');
             document.getElementById('main-section').classList.remove('hidden');
-            document.getElementById('welcome-msg').innerText = `Hey, ${myUser.charAt(0).toUpperCase() + myUser.slice(1)}`;
+            document.getElementById('welcome-msg').innerText = `Hi ${myUser.charAt(0).toUpperCase() + myUser.slice(1)}`;
             document.getElementById('remote-initial').innerText = targetUser.charAt(0).toUpperCase();
         });
 
-        // Error Handling for Socket
-        socket.on('connect_error', () => {
-            alert("Connection error! Please check your internet.");
-        });
-
         async function initiateCall() {
-            try {
-                // Must request mic early on mobile to "prime" the browser
-                localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                showOverlay("RINGING...");
-                socket.emit('call_user', { caller: myUser, target: targetUser });
-            } catch (err) {
-                alert("Please enable Microphone access in settings.");
-            }
+            document.getElementById('call-overlay').classList.remove('hidden');
+            document.getElementById('call-timer').innerText = "Ringing...";
+            socket.emit('call_user', { caller: myUser, target: targetUser });
         }
 
         socket.on('incoming_call', (data) => {
@@ -161,43 +147,34 @@
 
         async function acceptCall() {
             document.getElementById('incoming-popup').classList.add('hidden');
-            showOverlay("CONNECTING...");
+            document.getElementById('call-overlay').classList.remove('hidden');
+            document.getElementById('call-timer').innerText = "Connecting...";
             await setupWebRTC(true);
         }
 
         async function setupWebRTC(isInitiator) {
             if(pc) return;
             pc = new RTCPeerConnection(config);
-
             pc.oniceconnectionstatechange = () => {
                 const timer = document.getElementById('call-timer');
                 if (pc.iceConnectionState === 'connected') {
-                    timer.innerText = "CONNECTED";
-                    timer.classList.replace('text-blue-500', 'text-emerald-500');
-                    document.getElementById('ring-glow').classList.remove('pulse-ring');
-                } else if (['disconnected', 'failed', 'closed'].includes(pc.iceConnectionState)) {
-                    resetCallUI();
+                    timer.innerText = "Connected";
+                    timer.className = "text-green-500 font-bold mt-2";
+                    document.getElementById('ring-glow').classList.remove('ring-pulse');
                 }
             };
 
-            if(!localStream) {
-                try {
-                    localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                } catch(e) { return resetCallUI(); }
+            try {
+                localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+            } catch (err) {
+                alert("Please enable mic.");
+                resetCallUI();
+                return;
             }
 
-            localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
-            
-            pc.ontrack = e => {
-                const remoteAudio = document.getElementById('remoteAudio');
-                remoteAudio.srcObject = e.streams[0];
-                // Important for mobile to actually play
-                remoteAudio.play().catch(console.error);
-            };
-
-            pc.onicecandidate = e => {
-                if(e.candidate) socket.emit('signal', { candidate: e.candidate, target: targetUser });
-            };
+            pc.ontrack = e => { document.getElementById('remoteAudio').srcObject = e.streams[0]; };
+            pc.onicecandidate = e => { if(e.candidate) socket.emit('signal', { candidate: e.candidate, target: targetUser }); };
 
             if (isInitiator) {
                 const offer = await pc.createOffer();
@@ -216,17 +193,48 @@
             } else if (data.answer) {
                 if(pc) await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
             } else if (data.candidate) {
-                if(pc) await pc.addIceCandidate(new RTCIceCandidate(data.candidate)).catch(e => {});
+                if(pc) await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
             }
         });
 
-        // --- Helper Functions ---
-        function showOverlay(msg) {
-            document.getElementById('call-overlay').classList.remove('hidden');
-            document.getElementById('remote-user-name').innerText = targetUser;
-            document.getElementById('call-timer').innerText = msg;
-            document.getElementById('ring-glow').classList.add('pulse-ring');
+        function toggleHold() {
+            if(!localStream) return;
+            isHold = !isHold;
+            localStream.getAudioTracks()[0].enabled = !isHold;
+            document.getElementById('remoteAudio').muted = isHold;
+
+            const timer = document.getElementById('call-timer');
+            const holdBtn = document.getElementById('hold-btn');
+            
+            if (isHold) {
+                timer.innerText = "On Hold";
+                timer.className = "text-orange-500 font-bold mt-2";
+                holdBtn.classList.add('hold-active');
+            } else {
+                timer.innerText = "Connected";
+                timer.className = "text-green-500 font-bold mt-2";
+                holdBtn.classList.remove('hold-active');
+            }
+            socket.emit('call_action', { action: 'hold', status: isHold, target: targetUser });
         }
+
+        socket.on('call_action_received', (data) => {
+            const timer = document.getElementById('call-timer');
+            const remoteAudio = document.getElementById('remoteAudio');
+            if (data.action === 'hold') {
+                if (data.status) {
+                    timer.innerText = "Partner on hold";
+                    timer.className = "text-orange-500 font-bold mt-2";
+                    remoteAudio.muted = true;
+                } else {
+                    timer.innerText = "Connected";
+                    timer.className = "text-green-500 font-bold mt-2";
+                    remoteAudio.muted = false;
+                }
+            } else if (data.action === 'cut') {
+                resetCallUI();
+            }
+        });
 
         function endCall() {
             socket.emit('call_action', { action: 'cut', target: targetUser });
@@ -238,28 +246,18 @@
             document.getElementById('incoming-popup').classList.add('hidden');
         }
 
-        function toggleHold() {
-            if(!localStream) return;
-            isHold = !isHold;
-            localStream.getAudioTracks()[0].enabled = !isHold;
-            document.getElementById('call-timer').innerText = isHold ? "ON HOLD" : "CONNECTED";
-            socket.emit('call_action', { action: 'hold', status: isHold, target: targetUser });
-        }
-
-        socket.on('call_action_received', (data) => {
-            if (data.action === 'hold') {
-                document.getElementById('call-timer').innerText = data.status ? "PARTNER ON HOLD" : "CONNECTED";
-            } else if (data.action === 'cut') {
-                resetCallUI();
-            }
-        });
-
         function resetCallUI() {
             if(pc) { pc.close(); pc = null; }
             if(localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; }
+            document.getElementById('remoteAudio').srcObject = null;
+            document.getElementById('remoteAudio').muted = false;
             document.getElementById('call-overlay').classList.add('hidden');
             document.getElementById('incoming-popup').classList.add('hidden');
-            document.getElementById('call-timer').className = "text-blue-500 font-bold text-sm tracking-widest mt-2";
+            document.getElementById('ring-glow').classList.add('ring-pulse');
+            document.getElementById('hold-btn').classList.remove('hold-active');
+            const timer = document.getElementById('call-timer');
+            timer.className = "text-blue-500 font-bold mt-2";
+            timer.innerText = "Calling...";
             isHold = false;
         }
     </script>

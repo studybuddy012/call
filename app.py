@@ -10,7 +10,7 @@ socketio = SocketIO(app, cors_allowed_origins="*") # CORS allow karna zaroori ha
 # Fixed Credentials as per your request
 USERS = {
     "pratham": "Adsu", # Password change kar lena yahan
-    "Adhya": "123"    # Password change kar lena yahan
+    "adhya": "123"    # Password change kar lena yahan
 }
 
 # Track active connections
